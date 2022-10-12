@@ -33,15 +33,28 @@ const Board = () => {
   const allEqual = (arr) =>
     arr.every((val) => val != null && val?.type?.name == arr[0]?.type?.name);
 
+  const checkTrue = (array, check) => {
+    array.forEach((row) => allEqual(row) && (check = true));
+  };
+
+  const arrayTranspose = (array) => {
+    return array.map((_, colIndex) => array.map((row) => row[colIndex]));
+  };
+
   const checkWinner = () => {
     let check = false;
 
     // Horizontally Checking
-    tictac.current.forEach((arr) => allEqual(arr) && (check = true));
-
-    // tictac.current
+    checkTrue(tictac.current, check);
 
     // Vertically Checking
+
+    // STEP: 1 - Taking Transpose of array
+
+    const transpose = arrayTranspose(tictac.current);
+
+    // STEP: 2 - checking
+    checkTrue(transpose, check);
 
     // Diagnolly Checking
 
