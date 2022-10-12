@@ -6,6 +6,9 @@ import "../styles/Board.scss";
 
 const Board = () => {
   const boardRef = useRef();
+  const check = useRef(false);
+  const diagonalOne = useRef([]);
+  const diagonalTwo = useRef([]);
   const tictac = useRef([
     [null, null, null],
     [null, null, null],
@@ -33,25 +36,65 @@ const Board = () => {
   const allEqual = (arr) =>
     arr.every((val) => val != null && val?.type?.name == arr[0]?.type?.name);
 
+  const checkTrue = (array) => {
+    array.forEach((row) => {
+      if (allEqual(row)) {
+        check.current = true;
+      }
+    });
+  };
+
+  const arrayTranspose = (array) => {
+    return array.map((_, colIndex) => array.map((row) => row[colIndex]));
+  };
+
   const checkWinner = () => {
-    let check = false;
-
     // Horizontally Checking
-    tictac.current.forEach((arr) => allEqual(arr) && (check = true));
-
-    // tictac.current
+    checkTrue(tictac.current);
 
     // Vertically Checking
 
-    // Diagnolly Checking
+    // STEP: 1 - Taking Transpose of array //
+    const transpose = arrayTranspose(tictac.current);
 
-    if (check) {
+    // STEP: 2 - checking //
+    checkTrue(transpose);
+
+    // Diagnolly Checking
+    // STEP: 1 - Checking first Diagonal
+    for (let i = 0; i < tictac.current.length; i++) {
+      diagonalOne.current.push(tictac.current[i][i]);
+      if (i == 2) {
+        if (!allEqual(diagonalOne.current)) {
+          diagonalOne.current = [];
+        } else {
+          check.current = true;
+        }
+      }
+    }
+
+    // STEP: 2 - Checking Second Diagonal
+    const arr = [2, 1, 0];
+    for (let j = tictac.current.length - 1; j >= 0; j--) {
+      diagonalTwo.current.push(tictac.current[arr[j]][j]);
+      if (j == 0) {
+        console.log(diagonalTwo.current);
+        if (!allEqual(diagonalTwo.current)) {
+          diagonalTwo.current = [];
+          console.log("not equal");
+        } else {
+          console.log("equal");
+          check.current = true;
+        }
+      }
+    }
+
+    // Showing Output If Matched
+    if (check.current) {
       setTimeout(() => {
         alert(`You Won ${player.name}`);
       }, 100);
     }
-
-    // return check.some((val) => val == true);
   };
 
   const changeIcon = (mainIndex, nestedIndex) => {
@@ -73,7 +116,6 @@ const Board = () => {
               className="block"
               key={index}
               onClick={() => changeIcon(0, index)}
-              onClickCapture={() => changeIcon(0, index)}
             >
               {item}
             </div>
@@ -83,7 +125,6 @@ const Board = () => {
               className="block"
               key={index}
               onClick={() => changeIcon(1, index)}
-              onClickCapture={() => changeIcon(1, index)}
             >
               {item}
             </div>
@@ -93,7 +134,6 @@ const Board = () => {
               className="block"
               key={index}
               onClick={() => changeIcon(2, index)}
-              onClickCapture={() => changeIcon(2, index)}
             >
               {item}
             </div>
