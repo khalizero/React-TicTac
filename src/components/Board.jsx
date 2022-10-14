@@ -1,35 +1,61 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { TiTick } from "react-icons/ti";
 import { ImCross } from "react-icons/im";
-import { stringify } from "circular-json";
 import "../styles/Board.scss";
+import GameOver from "./GameOver";
 
 const Board = () => {
   const boardRef = useRef();
   const check = useRef(false);
   const diagonalOne = useRef([]);
   const diagonalTwo = useRef([]);
-  const tictac = useRef([
+  const [show, setShow] = useState(false);
+  const [lastPlayer, setLastPlayer] = useState("");
+
+  const player1 = useMemo(() => {
+    return {
+      name: "Ahmed",
+      icon: <TiTick style={{ color: "green", fontSize: "75px" }} />,
+    };
+  }, []);
+  const player2 = useMemo(() => {
+    return {
+      name: "Unknown",
+      icon: <ImCross style={{ color: "red" }} />,
+    };
+  }, []);
+
+  const [player, setPlayer] = useState(player1);
+
+  const defaultVal = [
     [null, null, null],
     [null, null, null],
     [null, null, null],
-  ]);
-  const [player, setPlayer] = useState({
-    name: "Player 1",
-    icon: <TiTick style={{ color: "green", fontSize: "75px" }} />,
-  });
+  ];
+  const tictac = useRef(defaultVal);
+
+  useEffect(() => {
+    if (check.current) {
+      setShow(true);
+    }
+  }, [check.current]);
+
+  const restartGame = () => {
+    tictac.current = defaultVal;
+    check.current = false;
+    setPlayer(player1);
+    setShow(false);
+  };
 
   const playerToggler = () => {
-    if (player.name == "Player 1") {
-      setPlayer({
-        name: "Player 2",
-        icon: <ImCross style={{ color: "red" }} />,
-      });
-    } else {
-      setPlayer({
-        name: "Player 1",
-        icon: <TiTick style={{ color: "green", fontSize: "75px" }} />,
-      });
+    if (!check.current) {
+      if (player.name == player1.name) {
+        setPlayer(player2);
+        setLastPlayer(player1.name);
+      } else {
+        setPlayer(player1);
+        setLastPlayer(player2.name);
+      }
     }
   };
 
@@ -88,13 +114,6 @@ const Board = () => {
         }
       }
     }
-
-    // Showing Output If Matched
-    if (check.current) {
-      setTimeout(() => {
-        alert(`You Won ${player.name}`);
-      }, 100);
-    }
   };
 
   const changeIcon = (mainIndex, nestedIndex) => {
@@ -108,7 +127,14 @@ const Board = () => {
 
   return (
     <>
-      <div className="player">{player.name}</div>
+      <GameOver
+        show={show}
+        title={lastPlayer + " has won this round."}
+        restart={restartGame}
+      />
+      <div className="player">
+        {check.current ? "Game has Been Concluded" : `${player.name}'s Turn`}
+      </div>
       <div className="boardWrapper" ref={boardRef}>
         <div className="board">
           {tictac.current[0].map((item, index) => (
