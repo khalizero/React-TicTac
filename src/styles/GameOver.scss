@@ -1,0 +1,45 @@
+.gameOverWrapper,
+.overlay {
+  position: absolute;
+}
+
+.overlay {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+.gameOverWrapper {
+  background-color: white;
+  width: 400px;
+  aspect-ratio: 3/1;
+  border-radius: 8px;
+  padding: 8px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  .gameOverTitle {
+    text-align: center;
+    margin: 40px 0;
+  }
+  .gameOverBtn {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    button {
+      background-color: black;
+      color: white;
+      border: none;
+      outline: none;
+      border-radius: 4px;
+      font-size: 14px;
+      padding: 8px;
+      transition: all 0.4s;
+      cursor: pointer;
+      &:hover {
+        background: rgba(0, 0, 0, 0.8);
+      }
+    }
+  }
+}
