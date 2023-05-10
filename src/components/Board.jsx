@@ -6,10 +6,11 @@ import GameOver from "./GameOver";
 
 const Board = () => {
   const boardRef = useRef();
-  const check = useRef(false);
+  const [check, setCheck] = useState(false);
   const diagonalOne = useRef([]);
   const diagonalTwo = useRef([]);
   const [show, setShow] = useState(false);
+  const [draw, setDraw] = useState(false);
   const [lastPlayer, setLastPlayer] = useState("");
 
   const player1 = useMemo(() => {
@@ -32,24 +33,25 @@ const Board = () => {
     [null, null, null],
     [null, null, null],
   ];
-  const tictac = useRef(defaultVal);
+  const [tictac, setTictac] = useState(defaultVal);
 
   useEffect(() => {
-    if (check.current) {
+    if (check) {
       setShow(true);
     }
-  }, [check.current]);
+  }, [check]);
 
   const restartGame = () => {
-    tictac.current = defaultVal;
-    check.current = false;
+     setTictac(defaultVal);
+    setCheck(false);
     setPlayer(player1);
     setShow(false);
+    setDraw(false)
   };
 
   const playerToggler = () => {
-    if (!check.current) {
-      if (player.name == player1.name) {
+    if (!check) {
+      if (player.name === player1.name) {
         setPlayer(player2);
         setLastPlayer(player1.name);
       } else {
@@ -57,15 +59,19 @@ const Board = () => {
         setLastPlayer(player2.name);
       }
     }
+    if(check){
+      console.log('cheked draw')
+    }
   };
 
   const allEqual = (arr) =>
-    arr.every((val) => val != null && val?.type?.name == arr[0]?.type?.name);
+    arr.every((val) => val != null && val?.type?.name === arr[0]?.type?.name);
 
   const checkTrue = (array) => {
     array.forEach((row) => {
       if (allEqual(row)) {
-        check.current = true;
+         setCheck(true);
+         return;
       }
     });
   };
@@ -76,49 +82,63 @@ const Board = () => {
 
   const checkWinner = () => {
     // Horizontally Checking
-    checkTrue(tictac.current);
+    checkTrue(tictac);
 
     // Vertically Checking
 
     // STEP: 1 - Taking Transpose of array //
-    const transpose = arrayTranspose(tictac.current);
+    const transpose = arrayTranspose(tictac);
 
     // STEP: 2 - checking //
     checkTrue(transpose);
 
     // Diagnolly Checking
     // STEP: 1 - Checking first Diagonal
-    for (let i = 0; i < tictac.current.length; i++) {
-      diagonalOne.current.push(tictac.current[i][i]);
-      if (i == 2) {
+    for (let i = 0; i < tictac.length; i++) {
+      diagonalOne.current.push(tictac[i][i]);
+      if (i === 2) {
         if (!allEqual(diagonalOne.current)) {
           diagonalOne.current = [];
         } else {
-          check.current = true;
+          setCheck(true);
+          return;
         }
       }
     }
 
     // STEP: 2 - Checking Second Diagonal
     const arr = [2, 1, 0];
-    for (let j = tictac.current.length - 1; j >= 0; j--) {
-      diagonalTwo.current.push(tictac.current[arr[j]][j]);
-      if (j == 0) {
+    for (let j = tictac.length - 1; j >= 0; j--) {
+      diagonalTwo.current.push(tictac[arr[j]][j]);
+      if (j === 0) {
         console.log(diagonalTwo.current);
         if (!allEqual(diagonalTwo.current)) {
           diagonalTwo.current = [];
           console.log("not equal");
         } else {
           console.log("equal");
-          check.current = true;
+          setCheck(true);
+          return;
         }
       }
     }
+
+    // Checking for draw
+    for (let k = 0; k < tictac.length; k++) {
+      for (let l = 0; l < tictac[k].length; l++) {
+        const element = tictac[k][l];
+        if(element === null){
+          return;
+        }
+      }
+    }
+    setCheck(true);
+    setDraw(true);
   };
 
   const changeIcon = (mainIndex, nestedIndex) => {
-    if (tictac.current[mainIndex][nestedIndex] == null) {
-      tictac.current[mainIndex][nestedIndex] = player.icon;
+    if (tictac[mainIndex][nestedIndex] == null) {
+      tictac[mainIndex][nestedIndex] = player.icon;
       playerToggler();
       checkWinner();
       console.log("player Changed");
@@ -129,15 +149,15 @@ const Board = () => {
     <>
       <GameOver
         show={show}
-        title={lastPlayer + " has won this round."}
+        title={draw ? 'Impressive! This was a draw.' : lastPlayer + " has won this round."}
         restart={restartGame}
       />
       <div className="player">
-        {check.current ? "Game has Been Concluded" : `${player.name}'s Turn`}
+        {check ? "Game has Been Concluded" : `${player.name}'s Turn`}
       </div>
       <div className="boardWrapper" ref={boardRef}>
         <div className="board">
-          {tictac.current[0].map((item, index) => (
+          {tictac[0].map((item, index) => (
             <div
               className="block"
               key={index}
@@ -146,7 +166,7 @@ const Board = () => {
               {item}
             </div>
           ))}
-          {tictac.current[1].map((item, index) => (
+          {tictac[1].map((item, index) => (
             <div
               className="block"
               key={index}
@@ -155,7 +175,7 @@ const Board = () => {
               {item}
             </div>
           ))}
-          {tictac.current[2].map((item, index) => (
+          {tictac[2].map((item, index) => (
             <div
               className="block"
               key={index}
